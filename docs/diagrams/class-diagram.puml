@@ -1,0 +1,108 @@
+@startuml class-diagram
+title Olympic Games Starter - Diagramme de classes
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "app" {
+  class AppModule <<NgModule>> {
+    +declarations: [AppComponent, HomeComponent, NotFoundComponent, CountryComponent]
+    +imports: [BrowserModule, AppRoutingModule]
+    +providers: [provideHttpClient()]
+    +bootstrap: [AppComponent]
+  }
+
+  class AppRoutingModule <<NgModule>> {
+    +routes: Routes
+  }
+
+  class AppComponent <<Component>> {
+    +selector: app-root
+  }
+}
+
+package "pages" {
+  class HomeComponent <<Component>> {
+    +selector: app-home
+    -olympicUrl: string
+    +pieChart: Chart<"pie", number[], string>
+    +totalCountries: number
+    +totalJOs: number
+    +error: string
+    +titlePage: string
+    -router: Router
+    -http: HttpClient
+    --
+    +ngOnInit(): void
+    +buildPieChart(countries: string[], sumOfAllMedalsYears: number[]): void
+  }
+
+  class CountryComponent <<Component>> {
+    +selector: app-country
+    -olympicUrl: string
+    +lineChart: Chart<"line", string[], number>
+    +titlePage: string
+    +totalEntries: any
+    +totalMedals: number
+    +totalAthletes: number
+    +error: string
+    -route: ActivatedRoute
+    -router: Router
+    -http: HttpClient
+    --
+    +ngOnInit(): void
+    +buildChart(years: number[], medals: string[]): void
+  }
+
+  class NotFoundComponent <<Component>> {
+    +selector: app-not-found
+  }
+}
+
+package "domain (JSON, non typé)" #line.dashed {
+  class Olympic <<any>> {
+    +id: number
+    +country: string
+    +participations: Participation[]
+  }
+
+  class Participation <<any>> {
+    +id: number
+    +year: number
+    +city: string
+    +medalsCount: number
+    +athleteCount: number
+  }
+}
+
+note right of Olympic
+  Aucune interface/modèle TypeScript n'existe :
+  les données sont manipulées en tant que 'any'
+  (cf. country.component.ts / home.component.ts).
+  Ce schéma est déduit de assets/mock/olympic.json.
+end note
+
+AppModule *-- AppComponent : bootstrap
+AppModule ..> AppRoutingModule : imports
+AppModule *-- HomeComponent : declarations
+AppModule *-- CountryComponent : declarations
+AppModule *-- NotFoundComponent : declarations
+
+AppRoutingModule ..> HomeComponent : route ""
+AppRoutingModule ..> CountryComponent : route "country/:countryName"
+AppRoutingModule ..> NotFoundComponent : route "not-found, **"
+
+HomeComponent --> "HttpClient" : injects
+HomeComponent --> "Router" : injects
+HomeComponent ..> Olympic : GET olympic.json
+HomeComponent ..> "Chart (chart.js)" : crée un pie chart
+
+CountryComponent --> "HttpClient" : injects
+CountryComponent --> "Router" : injects
+CountryComponent --> "ActivatedRoute" : injects
+CountryComponent ..> Olympic : GET olympic.json
+CountryComponent ..> "Chart (chart.js)" : crée un line chart
+
+Olympic "1" *-- "*" Participation : contient
+
+@enduml

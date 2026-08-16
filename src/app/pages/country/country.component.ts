@@ -6,6 +6,7 @@ import Chart from 'chart.js/auto';
 
 @Component({
   selector: 'app-country',
+  standalone: true,
   templateUrl: './country.component.html',
   styleUrls: ['./country.component.scss']
 })

@@ -1,0 +1,79 @@
+@startuml sequence-diagram
+title Olympic Games Starter - Diagramme de séquence : parcours utilisateur
+
+actor Utilisateur as User
+participant "Router" as Router
+participant "HomeComponent" as Home
+participant "CountryComponent" as Country
+participant "HttpClient" as Http
+participant "olympic.json" as Json
+participant "Chart.js" as Chart
+
+== Chargement de la page d'accueil ==
+User -> Router : ouvre "/"
+Router -> Home : instancie / affiche
+activate Home
+Home -> Http : get(olympicUrl)
+activate Http
+Http -> Json : requête HTTP GET
+activate Json
+Json --> Http : données JSON (liste des pays)
+deactivate Json
+Http --> Home : subscribe(data)
+deactivate Http
+
+alt données reçues
+    Home -> Home : calcule totalJOs, totalCountries, sumOfAllMedalsYears
+    Home -> Chart : buildPieChart(countries, sumOfAllMedalsYears)
+    activate Chart
+    Chart --> Home : pieChart
+    deactivate Chart
+    Home --> User : affiche le pie chart + KPIs
+else erreur HTTP
+    Http --> Home : error (HttpErrorResponse)
+    Home -> Home : error = error.message
+    Home --> User : affiche le message d'erreur
+end
+deactivate Home
+
+== Navigation vers le détail d'un pays ==
+User -> Chart : clic sur une part du pie chart
+activate Chart
+Chart -> Home : onClick(event)
+activate Home
+Home -> Chart : getElementsAtEventForMode(...)
+Chart --> Home : points[]
+Home -> Home : countryName = pieChart.data.labels[point.index]
+Home -> Router : navigate(["country", countryName])
+deactivate Home
+deactivate Chart
+
+== Chargement de la page pays ==
+Router -> Country : instancie / affiche
+activate Country
+Country -> Country : route.paramMap.subscribe(countryName)
+Country -> Http : get(olympicUrl)
+activate Http
+Http -> Json : requête HTTP GET
+activate Json
+Json --> Http : données JSON (liste des pays)
+deactivate Json
+Http --> Country : subscribe(data)
+deactivate Http
+
+alt pays trouvé
+    Country -> Country : selectedCountry = data.find(i => i.country === countryName)
+    Country -> Country : calcule totalEntries, totalMedals, totalAthletes
+    Country -> Chart : buildChart(years, medals)
+    activate Chart
+    Chart --> Country : lineChart
+    deactivate Chart
+    Country --> User : affiche le line chart + KPIs du pays
+else erreur HTTP
+    Http --> Country : error (HttpErrorResponse)
+    Country -> Country : error = error.message
+    Country --> User : affiche le message d'erreur
+end
+deactivate Country
+
+@enduml

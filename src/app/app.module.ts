@@ -8,8 +8,8 @@ import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { CountryComponent } from "./pages/country/country.component";
 
 @NgModule({
-  declarations: [AppComponent, HomeComponent, NotFoundComponent, CountryComponent],
-  imports: [BrowserModule, AppRoutingModule],
+  declarations: [AppComponent, HomeComponent, NotFoundComponent],
+  imports: [BrowserModule, AppRoutingModule, CountryComponent],
   providers: [provideHttpClient()],
   bootstrap: [AppComponent],
 })

@@ -1,19 +1,18 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { HomeComponent } from './pages/home/home.component';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
-import { CountryComponent } from "./pages/country/country.component";
+import { OlympicGameComponent } from './components/olympic-game/olympic-game.component';
+import { SingleCountryComponent } from './components/single-country/single-country.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: HomeComponent,
+    component: OlympicGameComponent,
   },
   {
-    path : 'country/:countryName',
-    component : CountryComponent
+    path: 'country/:name',
+    component: SingleCountryComponent,
   },
-
   {
     path : 'not-found',
     component : NotFoundComponent
