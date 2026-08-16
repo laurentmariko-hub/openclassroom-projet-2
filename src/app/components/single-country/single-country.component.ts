@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Chart } from 'chart.js';
-import { ChartFactory } from 'src/app/models/chart-factory';
 import { Country } from 'src/app/models/country';
 import { Participation } from 'src/app/models/participation';
 import { ChartService } from 'src/app/services/chart.service';
@@ -10,7 +9,7 @@ import { OlympicService } from 'src/app/services/olympic.service';
 @Component({
   selector: 'app-single-country',
   standalone: true,
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './single-country.component.html',
   styleUrl: './single-country.component.scss'
 })
