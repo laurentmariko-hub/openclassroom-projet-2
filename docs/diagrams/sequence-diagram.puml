@@ -3,77 +3,90 @@ title Olympic Games Starter - Diagramme de séquence : parcours utilisateur
 
 actor Utilisateur as User
 participant "Router" as Router
-participant "HomeComponent" as Home
-participant "CountryComponent" as Country
+participant "OlympicGameComponent" as OlympicGame
+participant "OlympicService" as Service
+participant "ChartService" as ChartSvc
 participant "HttpClient" as Http
 participant "olympic.json" as Json
 participant "Chart.js" as Chart
 
-== Chargement de la page d'accueil ==
-User -> Router : ouvre "/"
-Router -> Home : instancie / affiche
-activate Home
-Home -> Http : get(olympicUrl)
+== Étape 1: Chargement de la page d'accueil ==
+User -> Router : navigation vers "/"
+Router -> OlympicGame : instanciation du composant
+activate OlympicGame
+
+OlympicGame -> Service : getParticipatingCountries()
+activate Service
+Service -> Http : GET olympic.json
 activate Http
-Http -> Json : requête HTTP GET
+Http -> Json : requête HTTP
 activate Json
-Json --> Http : données JSON (liste des pays)
+Json --> Http : [Country[], ...]
 deactivate Json
-Http --> Home : subscribe(data)
+Http --> Service : Observable<Country[]>
 deactivate Http
 
-alt données reçues
-    Home -> Home : calcule totalJOs, totalCountries, sumOfAllMedalsYears
-    Home -> Chart : buildPieChart(countries, sumOfAllMedalsYears)
-    activate Chart
-    Chart --> Home : pieChart
-    deactivate Chart
-    Home --> User : affiche le pie chart + KPIs
-else erreur HTTP
-    Http --> Home : error (HttpErrorResponse)
-    Home -> Home : error = error.message
-    Home --> User : affiche le message d'erreur
-end
-deactivate Home
+Service --> OlympicGame : données typées
+deactivate Service
 
-== Navigation vers le détail d'un pays ==
-User -> Chart : clic sur une part du pie chart
+OlympicGame -> OlympicGame : calcul des KPIs\n(numberOfCountries, numberOfJOs)
+OlympicGame -> OlympicGame : construction des arrays\n(countryNames, medals)
+
+OlympicGame -> ChartSvc : getPieChart(countryNames, medals)
+activate ChartSvc
+ChartSvc -> Chart : création pie chart
 activate Chart
-Chart -> Home : onClick(event)
-activate Home
-Home -> Chart : getElementsAtEventForMode(...)
-Chart --> Home : points[]
-Home -> Home : countryName = pieChart.data.labels[point.index]
-Home -> Router : navigate(["country", countryName])
-deactivate Home
+Chart --> ChartSvc : Chart instance
 deactivate Chart
+ChartSvc --> OlympicGame : Chart configuré
+deactivate ChartSvc
 
-== Chargement de la page pays ==
-Router -> Country : instancie / affiche
-activate Country
-Country -> Country : route.paramMap.subscribe(countryName)
-Country -> Http : get(olympicUrl)
+OlympicGame --> User : affichage pie chart + KPIs
+deactivate OlympicGame
+
+== Étape 2: Navigation vers détail pays ==
+User -> Chart : clic sur part du pie chart
+Chart -> OlympicGame : événement click
+activate OlympicGame
+OlympicGame -> OlympicGame : extraction countryName
+OlympicGame -> Router : navigate(['country', name])
+deactivate OlympicGame
+
+== Étape 3: Chargement page pays ==
+participant "SingleCountryComponent" as SingleCountry
+Router -> SingleCountry : instanciation
+activate SingleCountry
+
+SingleCountry -> SingleCountry : lecture route params ('name')
+
+SingleCountry -> Service : getCountryByName(name)
+activate Service
+Service -> Http : GET olympic.json
 activate Http
-Http -> Json : requête HTTP GET
+Http -> Json : requête HTTP
 activate Json
-Json --> Http : données JSON (liste des pays)
+Json --> Http : [Country[], ...]
 deactivate Json
-Http --> Country : subscribe(data)
+Http --> Service : Observable<Country[]>
 deactivate Http
 
-alt pays trouvé
-    Country -> Country : selectedCountry = data.find(i => i.country === countryName)
-    Country -> Country : calcule totalEntries, totalMedals, totalAthletes
-    Country -> Chart : buildChart(years, medals)
-    activate Chart
-    Chart --> Country : lineChart
-    deactivate Chart
-    Country --> User : affiche le line chart + KPIs du pays
-else erreur HTTP
-    Http --> Country : error (HttpErrorResponse)
-    Country -> Country : error = error.message
-    Country --> User : affiche le message d'erreur
-end
-deactivate Country
+Service -> Service : find() par name
+Service --> SingleCountry : Observable<Country>
+deactivate Service
+
+SingleCountry -> SingleCountry : extraction données pays\n(years, medals, athletes)
+SingleCountry -> SingleCountry : calcul des KPIs
+
+SingleCountry -> ChartSvc : getLineChart(years, medals)
+activate ChartSvc
+ChartSvc -> Chart : création line chart
+activate Chart
+Chart --> ChartSvc : Chart instance
+deactivate Chart
+ChartSvc --> SingleCountry : Chart configuré
+deactivate ChartSvc
+
+SingleCountry --> User : affichage line chart + KPIs
+deactivate SingleCountry
 
 @enduml
