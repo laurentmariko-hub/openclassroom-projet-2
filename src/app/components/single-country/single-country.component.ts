@@ -52,16 +52,10 @@ ngOnInit(): void {
         
         const years = country?.participations.map((i: Participation) => i.year.toString()) ?? [];
         const medals = country?.participations.map((i: Participation) => i.medalsCount) ?? [];
-        if (this.lineChart) {
-          this.lineChart.data.labels = years;
-          this.lineChart.data.datasets[0].data = medals;
-          this.lineChart.update();
-        } else {
-          this.lineChart = this.chartService.getLineChart(
+        this.lineChart = this.chartService.getLineChart(
             years,
             medals
           );
-        }
     });
   }
 }

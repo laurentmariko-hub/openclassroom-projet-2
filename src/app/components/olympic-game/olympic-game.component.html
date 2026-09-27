@@ -2,6 +2,11 @@
 <hr/>
 <div>
   <div>
+@if (errorMessage) {
+  <p role="alert">{{ errorMessage }}</p>
+} @else {
+  <!-- Votre affichage des pays -->
+
     <div class="center">
       <div>{{ titlePage }}</div>
     </div>
@@ -15,6 +20,7 @@
         <p>{{ numberOfJOs }}</p>
       </div>
     </div>
+  }
   </div>
   <canvas id="DashboardPieChart">{{ pieChart }}</canvas>
 </div>
