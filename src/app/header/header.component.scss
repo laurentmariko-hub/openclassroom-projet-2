@@ -1,0 +1,25 @@
+.indicators {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.indicator {
+  border: 2px solid #0b868f;
+  border-radius: 10px;
+  padding: 10px 20px;
+  text-align: center;
+}
+
+.indicator_last_child {
+  font-weight: bold;
+}
+
+@media (max-width: 767px) {
+  .indicators {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+

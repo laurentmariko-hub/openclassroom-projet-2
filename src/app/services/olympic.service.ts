@@ -4,6 +4,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, map, Observable } from 'rxjs';
 import { Participation } from '../models/participation';
+import { CountryInterface } from '../models/country-interface';
 
 @Injectable({
   providedIn: 'root'
@@ -19,8 +20,8 @@ export class OlympicService {
   }
 
   public getParticipatingCountries(): Observable<Country[]> {
-    return this.http.get<any[]>(this.olympicUrl).pipe(
-      map((data: any[]) =>
+    return this.http.get<CountryInterface[]>(this.olympicUrl).pipe(
+      map((data: CountryInterface[]) =>
         data.map(
           item => new Country(
             item.country,

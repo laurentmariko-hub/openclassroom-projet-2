@@ -7,19 +7,10 @@
 } @else {
   <!-- Votre affichage des pays -->
 
-    <div class="center">
-      <div>{{ titlePage }}</div>
-    </div>
-    <div class="split">
-      <div>
-        <p>Number of countries</p>
-        <p>{{ numberOfCountries }}</p>
-      </div>
-      <div>
-        <p>Number of JOs</p>
-        <p>{{ numberOfJOs }}</p>
-      </div>
-    </div>
+    <app-header
+      [title]="title"
+      [indicators]="indicators">
+    </app-header>
   }
   </div>
   <canvas id="DashboardPieChart">{{ pieChart }}</canvas>

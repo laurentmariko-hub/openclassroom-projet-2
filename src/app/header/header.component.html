@@ -1,0 +1,11 @@
+<div class="center">
+  <div>{{ title() }}</div>
+</div>
+<div class="indicators">
+  @for (indicator of indicators(); track indicator.label) {
+    <div class="indicator">
+      <p>{{ indicator.label }}</p>
+      <p class="indicator_last_child">{{ indicator.value }}</p>
+    </div >
+  }
+</div>

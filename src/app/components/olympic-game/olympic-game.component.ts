@@ -6,10 +6,13 @@ import { ChartService } from 'src/app/services/chart.service';
 import { Participation } from 'src/app/models/participation';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { AppChart } from 'src/app/models/chart-factory';
+import { Indicator } from 'src/app/models/indicator';
+import { HeaderComponent } from 'src/app/header/header.component';
 @Component({
   selector: 'app-olympic-game',
   standalone: true,
-  imports: [],
+  imports: [HeaderComponent],
   templateUrl: './olympic-game.component.html',
   styleUrls: ['./olympic-game.component.scss']
 })
@@ -17,19 +20,20 @@ export class OlympicGameComponent implements OnInit {
   constructor(private olympicService: OlympicService, private chartService: ChartService, private router: Router) {}
   
   Countries!: Country[];
-  public titlePage: string = "Medals per Country";
   public totalEntries: number = 0;
   public countries: Country[] = [];
   public countryNames: string[] | undefined = [];
-  public pieChart: Chart<any, any, any> | undefined;
+  public pieChart: AppChart | undefined;
   public numberOfCountries: number = 0;
   public numberOfJOs: number = 0;
   public medals : number[][] = [];
   public sumOfAllMedalsYears : number[] = [];
   public errorMessage: string = '';
-
-ngOnInit(): void {
-  this.olympicService.getParticipatingCountries().subscribe({
+  title : string = "Medals per Country";
+  indicators: Indicator[] = [];
+  
+  ngOnInit(): void {    
+      this.olympicService.getParticipatingCountries().subscribe({
     next: (data: Country[]): void => {
 
       this.countries = data;
@@ -50,6 +54,12 @@ ngOnInit(): void {
         this.countryNames ?? [],
         this.sumOfAllMedalsYears
       );
+
+      this.indicators = [
+        { label: 'Number of countries', value: this.numberOfCountries },
+        { label: 'Number of JOs', value: this.numberOfJOs }
+      ];
+
     },
     error: (error: HttpErrorResponse): void => {
       void this.router.navigate(['/not-found']);

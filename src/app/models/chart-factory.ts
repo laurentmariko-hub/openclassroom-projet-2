@@ -2,10 +2,16 @@ import Chart from 'chart.js/auto';
 import { Router } from '@angular/router';
 import { chartType } from './chart-type';
 
+
+  export type AppChart =
+  | Chart<'line', number[], string>
+  | Chart<'pie', number[], string>;
+
 export class ChartFactory {
   constructor() {}
 
-  public static build(labels: string[], data: number[], chartType: chartType, router: Router): Chart<any, any, any> {
+
+  public static build(labels: string[], data: number[], chartType: chartType, router: Router): AppChart {
     if(chartType === 'lineChart') {
     console.log(
       'Canvas:',
@@ -41,7 +47,7 @@ private static buildChartLineChart(
   });
 }
 
-  private static buildPieChart(sumOfAllMedalsYears: number[], countries: string[], router: Router) : Chart<"pie", number[], string> {
+  private static buildPieChart(sumOfAllMedalsYears: number[], countries: string[], router: Router) : AppChart {
     var pieChart = new Chart<"pie", number[], string>("DashboardPieChart", {
       type: 'pie',
       data: {
