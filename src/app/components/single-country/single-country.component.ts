@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Chart } from 'chart.js';
 import { HeaderComponent } from 'src/app/header/header.component';
 import { AppChart } from 'src/app/models/chart-factory';
 import { Country } from 'src/app/models/country';

@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Country } from 'src/app/models/country';
 import { OlympicService } from 'src/app/services/olympic.service';
-import Chart from 'chart.js/auto';
 import { ChartService } from 'src/app/services/chart.service';
-import { Participation } from 'src/app/models/participation';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AppChart } from 'src/app/models/chart-factory';

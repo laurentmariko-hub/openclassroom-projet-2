@@ -1,10 +1,12 @@
 @startuml class-diagram
-title Olympic Games Starter - Diagramme de classes (refactorisé)
+title Olympic Games Starter - Diagramme de classes (code source complet)
 
 skinparam classAttributeIconSize 0
 skinparam packageStyle rectangle
+skinparam classFontSize 12
+skinparam linetype ortho
 
-package "app (Root)" {
+package "app (racine)" {
   class AppModule <<NgModule>> {
     +declarations: [AppComponent, NotFoundComponent]
     +imports: [BrowserModule, AppRoutingModule]
@@ -21,72 +23,84 @@ package "app (Root)" {
   }
 }
 
-package "components (Standalone)" {
-  class OlympicGameComponent <<Component>> {
+package "pages" {
+  class NotFoundComponent <<Component>> {
+    +selector: app-not-found
+  }
+}
+
+package "components" {
+  class OlympicGameComponent <<Standalone Component>> {
     +selector: app-olympic-game
-    +standalone: true
     -olympicService: OlympicService
     -chartService: ChartService
+    -router: Router
+    +Countries: Country[]
+    +totalEntries: number
     +countries: Country[]
     +countryNames: string[]
-    +pieChart: Chart<any, any, any>
+    +pieChart: AppChart
     +numberOfCountries: number
     +numberOfJOs: number
-    +titlePage: string
+    +medals: number[][]
+    +sumOfAllMedalsYears: number[]
+    +errorMessage: string
+    +title: string
+    +indicators: Indicator[]
     --
     +ngOnInit(): void
   }
 
-  class CountryListComponent <<Component>> {
-    +selector: app-country-list
-    +standalone: true
-    -olympicService: OlympicService
-    +countries: Country[]
-    --
-    +ngOnInit(): void
-  }
-
-  class SingleCountryComponent <<Component>> {
+  class SingleCountryComponent <<Standalone Component>> {
     +selector: app-single-country
-    +standalone: true
     -olympicService: OlympicService
     -chartService: ChartService
     -route: ActivatedRoute
     +country: Country
-    +lineChart: Chart<any, any, any>
     +totalEntries: number
     +totalMedals: number
     +totalAthletes: number
     +titlePage: string
+    +lineChart: AppChart
+    +title: string
+    +indicators: Indicator[]
     --
     +ngOnInit(): void
   }
+
 }
 
-package "pages (Standalone)" {
-  class NotFoundComponent <<Component>> {
-    +selector: app-not-found
-    +standalone: true
+package "header" {
+  class HeaderComponent <<Standalone Component>> {
+    +selector: app-header
+    +title: InputSignal<string | undefined>
+    +indicators: InputSignal<Indicator[] | undefined>
   }
 }
 
 package "services" {
   class OlympicService <<Injectable>> {
     -olympicUrl: string
+    +countries: Country[]
+    +numberOfCountries: number
+    +countryNames: string[]
     -http: HttpClient
     --
     +getParticipatingCountries(): Observable<Country[]>
-    +getCountries(): Observable<Country[]>
-    +getNumberOfCountries(): Observable<number>
-    +getCountryByName(name: string): Observable<Country>
-    +getTotalJOs(): Observable<number>
+    +getNumberOfCountries(countries: Country[]): number
+    +getCountryNames(countries: Country[]): string[] | undefined
+    +getCountryByName(name: string): Observable<Country | undefined>
+    +getTotalJOs(countries: Country[]): number
+    +getSumOfAllMedalsYears(countries: Country[]): number[]
+    +getNumberOfJOs(countries: Country[]): number
+    +getTitlePage(): string
   }
 
   class ChartService <<Injectable>> {
     -router: Router
     --
-    +getLineChart(labels: string[], data: number[]): Chart
-    +getPieChart(labels: string[], data: number[]): Chart
+    +getLineChart(labels: string[], data: number[]): AppChart
+    +getPieChart(labels: string[], data: number[]): AppChart
   }
 }
 
@@ -98,7 +112,7 @@ package "models" {
     +getTotalEntries(): number
     +getTotalMedals(): number
     +getTotalAthletes(): number
-    +getParticipationByYear(year: number): Participation
+    +getParticipationByYear(year: number): Participation | undefined
   }
 
   class Participation {
@@ -109,47 +123,81 @@ package "models" {
     +medalsCount: number
   }
 
-  class ChartFactory <<factory>> {
-    +{static} build(labels: string[], data: number[], chartType: chartType, router: Router): Chart
+  interface CountryInterface {
+    +id: number
+    +country: string
+    +participations: Participation[]
   }
 
-  class ChartType <<enum>> {
-    lineChart
-    pieChart
+  class Indicator {
+    +label: string
+    +value: number
+  }
+
+  class ChartFactory <<factory>> {
+    -{static} buildChartLineChart(years: string[], medals: number[]): Chart
+    -{static} buildPieChart(sumOfAllMedalsYears: number[], countries: string[], router: Router): AppChart
+    +{static} build(labels: string[], data: number[], chartType: chartType, router: Router): AppChart
+  }
+
+  class chartType <<type>> {
+    'lineChart' | 'pieChart'
+  }
+
+  class AppChart <<type>> {
+    Chart<'line', number[], string> | Chart<'pie', number[], string>
   }
 }
 
-OlympicGameComponent --> OlympicService : injects
-OlympicGameComponent --> ChartService : injects
-OlympicGameComponent --> CountryListComponent : imports
-OlympicGameComponent ..> Country : uses
-OlympicGameComponent ..> "Chart.js" : crée pie chart
+package "externes (Angular / Chart.js)" {
+  class Router <<external>>
+  class HttpClient <<external>>
+  class ActivatedRoute <<external>>
+  class Chart <<external>>
+}
 
-CountryListComponent --> OlympicService : injects
-CountryListComponent ..> Country : affiche liste
-
-SingleCountryComponent --> OlympicService : injects
-SingleCountryComponent --> ChartService : injects
-SingleCountryComponent ..> Country : uses
-SingleCountryComponent ..> "Chart.js" : crée line chart
-
+' Racine et routage
 AppModule *-- AppComponent : bootstrap
 AppModule ..> AppRoutingModule : imports
-AppModule *-- NotFoundComponent : declarations
-
+AppModule ..> NotFoundComponent : declarations
 AppRoutingModule ..> OlympicGameComponent : route ""
 AppRoutingModule ..> SingleCountryComponent : route "country/:name"
 AppRoutingModule ..> NotFoundComponent : route "not-found, **"
 
+' Composants
+OlympicGameComponent --> OlympicService : injects
+OlympicGameComponent --> ChartService : injects
+OlympicGameComponent --> Router : injects
+OlympicGameComponent --> HeaderComponent : imports
+OlympicGameComponent ..> Indicator : utilise
+OlympicGameComponent ..> Country : utilise
+
+SingleCountryComponent --> OlympicService : injects
+SingleCountryComponent --> ChartService : injects
+SingleCountryComponent --> ActivatedRoute : injects
+SingleCountryComponent --> HeaderComponent : imports
+SingleCountryComponent ..> Indicator : utilise
+SingleCountryComponent ..> Country : utilise
+
+HeaderComponent ..> Indicator : affiche
+
+' Services
 OlympicService --> HttpClient : injects
 OlympicService ..> Country : retourne
-OlympicService ..> Participation : retourne
+OlympicService ..> CountryInterface : mappe
+OlympicService ..> Participation : utilise
 
 ChartService --> Router : injects
-ChartService --> ChartFactory : utilise
-ChartFactory --> ChartType : utilise
+ChartService ..> ChartFactory : utilise
+ChartService ..> AppChart : retourne
 
-Country *-- Participation : composition
-Country "1" -- "*" Participation : participations
+' Modèles
+ChartFactory ..> chartType : paramètre
+ChartFactory ..> AppChart : retourne
+ChartFactory ..> Chart : crée
+ChartFactory ..> Router : navigation
+
+Country "1" *-- "*" Participation : participations
+CountryInterface ..> Participation : participations
 
 @enduml

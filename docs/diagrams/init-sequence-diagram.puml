@@ -1,0 +1,98 @@
+@startuml init-sequence-diagram
+title Olympic Games Starter - Diagramme de séquence : initialisation de l'application
+
+actor Navigateur as Browser
+participant "main.ts" as Main
+participant "platformBrowserDynamic" as Platform
+participant "AppModule" as AppMod
+participant "AppRoutingModule" as RoutingMod
+participant "Router" as Router
+participant "AppComponent" as AppComp
+participant "OlympicGameComponent" as OlympicGame
+participant "OlympicService" as Service
+participant "ChartService" as ChartSvc
+participant "HttpClient" as Http
+participant "olympic.json" as Json
+participant "Chart.js" as Chart
+
+== Étape 1: Démarrage du bundle ==
+Browser -> Main : chargement main.js (index.html)
+activate Main
+Main -> Main : environment.production ? enableProdMode()
+Main -> Platform : bootstrapModule(AppModule)
+activate Platform
+
+== Étape 2: Construction de l'injecteur racine ==
+Platform -> AppMod : création du module
+activate AppMod
+AppMod -> RoutingMod : imports (RouterModule.forRoot(routes))
+activate RoutingMod
+RoutingMod -> Router : enregistrement des routes ('', 'country/:name', 'not-found', '**')
+activate Router
+Router --> RoutingMod : Router configuré
+deactivate RoutingMod
+AppMod -> AppMod : providers: provideHttpClient()
+Platform -> AppComp : création du composant bootstrap
+activate AppComp
+AppComp -> AppComp : template : <router-outlet>
+AppComp --> Platform : composant monté
+deactivate AppComp
+deactivate AppMod
+
+== Étape 3: Navigation initiale ==
+Platform -> Router : navigation initiale (URL courante, ex. "/")
+Router -> Router : match route '' → OlympicGameComponent
+Router -> OlympicGame : instanciation dans <router-outlet>
+activate OlympicGame
+OlympicGame -> Service : injection (providedIn: 'root')
+activate Service
+Service -> Service : constructeur (log "OlympicService constructeur appelé")
+Service --> OlympicGame : instance
+deactivate Service
+OlympicGame -> ChartSvc : injection (providedIn: 'root')
+activate ChartSvc
+ChartSvc -> Router : injection du Router
+ChartSvc --> OlympicGame : instance
+deactivate ChartSvc
+
+== Étape 4: Chargement des données (ngOnInit) ==
+OlympicGame -> OlympicGame : ngOnInit()
+OlympicGame -> Service : getParticipatingCountries()
+activate Service
+Service -> Http : GET ./assets/mock/olympic.json
+activate Http
+Http -> Json : requête HTTP
+activate Json
+Json --> Http : CountryInterface[]
+deactivate Json
+Http --> Service : Observable<CountryInterface[]>
+deactivate Http
+Service -> Service : map → new Country(name, participations)
+Service --> OlympicGame : Observable<Country[]>
+deactivate Service
+
+== Étape 5: Préparation de l'affichage ==
+alt Données reçues (next)
+  OlympicGame -> Service : getNumberOfCountries / getNumberOfJOs\n/ getCountryNames / getSumOfAllMedalsYears
+  Service --> OlympicGame : KPIs et séries
+  OlympicGame -> ChartSvc : getPieChart(countryNames, sumOfAllMedalsYears)
+  activate ChartSvc
+  ChartSvc -> Chart : new Chart("DashboardPieChart", config)
+  activate Chart
+  Chart --> ChartSvc : AppChart
+  deactivate Chart
+  ChartSvc --> OlympicGame : AppChart
+  deactivate ChartSvc
+  OlympicGame -> OlympicGame : indicators = [countries, JOs]
+  OlympicGame --> Browser : affichage HeaderComponent + pie chart
+else Erreur HTTP (error)
+  OlympicGame -> Router : navigate(['/not-found'])
+  Router -> Router : route 'not-found' → NotFoundComponent
+  Router --> Browser : affichage page non trouvée
+end
+
+deactivate OlympicGame
+deactivate Platform
+deactivate Main
+
+@enduml

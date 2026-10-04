@@ -1,8 +1,7 @@
-import { Injectable, OnInit } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Country } from '../models/country';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, map, Observable } from 'rxjs';
+import { HttpClient} from '@angular/common/http';
+import { map, Observable } from 'rxjs';
 import { Participation } from '../models/participation';
 import { CountryInterface } from '../models/country-interface';
 
@@ -29,16 +28,6 @@ export class OlympicService {
           )
         )
       )
-    );
-  }
-
-  public getNumberOfCountries_bup(): Observable<number> {
-    return this.getParticipatingCountries().pipe(
-      map((countries: Country[]) => {
-        const total = countries.length;
-        console.log(`Nombre total de JO : ${total}`);
-        return total;
-      })
     );
   }
 

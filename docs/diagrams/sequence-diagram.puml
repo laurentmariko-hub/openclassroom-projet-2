@@ -4,8 +4,11 @@ title Olympic Games Starter - Diagramme de séquence : parcours utilisateur
 actor Utilisateur as User
 participant "Router" as Router
 participant "OlympicGameComponent" as OlympicGame
+participant "SingleCountryComponent" as SingleCountry
+participant "HeaderComponent" as Header
 participant "OlympicService" as Service
 participant "ChartService" as ChartSvc
+participant "ChartFactory" as Factory
 participant "HttpClient" as Http
 participant "olympic.json" as Json
 participant "Chart.js" as Chart
@@ -21,42 +24,55 @@ Service -> Http : GET olympic.json
 activate Http
 Http -> Json : requête HTTP
 activate Json
-Json --> Http : [Country[], ...]
+Json --> Http : CountryInterface[]
 deactivate Json
-Http --> Service : Observable<Country[]>
+Http --> Service : Observable<CountryInterface[]>
 deactivate Http
-
-Service --> OlympicGame : données typées
+Service -> Service : map → new Country(name, participations)
+Service --> OlympicGame : Observable<Country[]>
 deactivate Service
 
-OlympicGame -> OlympicGame : calcul des KPIs\n(numberOfCountries, numberOfJOs)
-OlympicGame -> OlympicGame : construction des arrays\n(countryNames, medals)
+OlympicGame -> Service : getNumberOfCountries(countries)
+Service --> OlympicGame : numberOfCountries
+OlympicGame -> Service : getNumberOfJOs(countries)
+Service --> OlympicGame : numberOfJOs
+OlympicGame -> Service : getCountryNames(countries)
+Service --> OlympicGame : countryNames
+OlympicGame -> Service : getSumOfAllMedalsYears(countries)
+Service --> OlympicGame : sumOfAllMedalsYears
 
-OlympicGame -> ChartSvc : getPieChart(countryNames, medals)
+OlympicGame -> ChartSvc : getPieChart(countryNames, sumOfAllMedalsYears)
 activate ChartSvc
-ChartSvc -> Chart : création pie chart
+ChartSvc -> Factory : build(labels, data, 'pieChart', router)
+activate Factory
+Factory -> Chart : new Chart("DashboardPieChart", config)
 activate Chart
-Chart --> ChartSvc : Chart instance
+Chart --> Factory : Chart instance
 deactivate Chart
-ChartSvc --> OlympicGame : Chart configuré
+Factory --> ChartSvc : AppChart
+deactivate Factory
+ChartSvc --> OlympicGame : AppChart
 deactivate ChartSvc
 
-OlympicGame --> User : affichage pie chart + KPIs
+OlympicGame -> OlympicGame : indicators = [countries, JOs]
+OlympicGame -> Header : title, indicators
+activate Header
+Header --> User : affichage titre + indicateurs
+deactivate Header
+OlympicGame --> User : affichage pie chart
 deactivate OlympicGame
 
 == Étape 2: Navigation vers détail pays ==
-User -> Chart : clic sur part du pie chart
-Chart -> OlympicGame : événement click
-activate OlympicGame
-OlympicGame -> OlympicGame : extraction countryName
-OlympicGame -> Router : navigate(['country', name])
-deactivate OlympicGame
+User -> Chart : clic sur une part du pie chart
+Chart -> Factory : onClick(event)
+activate Factory
+Factory -> Factory : getElementsAtEventForMode() → countryName
+Factory -> Router : navigate(['country', countryName])
+deactivate Factory
+Router -> SingleCountry : instanciation (route 'country/:name')
 
 == Étape 3: Chargement page pays ==
-participant "SingleCountryComponent" as SingleCountry
-Router -> SingleCountry : instanciation
 activate SingleCountry
-
 SingleCountry -> SingleCountry : lecture route params ('name')
 
 SingleCountry -> Service : getCountryByName(name)
@@ -65,28 +81,44 @@ Service -> Http : GET olympic.json
 activate Http
 Http -> Json : requête HTTP
 activate Json
-Json --> Http : [Country[], ...]
+Json --> Http : CountryInterface[]
 deactivate Json
-Http --> Service : Observable<Country[]>
+Http --> Service : Observable<CountryInterface[]>
 deactivate Http
-
-Service -> Service : find() par name
-Service --> SingleCountry : Observable<Country>
+Service -> Service : map → Country[] puis filter() par name
+Service --> SingleCountry : Observable<Country | undefined>
 deactivate Service
 
-SingleCountry -> SingleCountry : extraction données pays\n(years, medals, athletes)
-SingleCountry -> SingleCountry : calcul des KPIs
+SingleCountry -> SingleCountry : calcul des KPIs\n(entries, medals, athletes)
+SingleCountry -> SingleCountry : title = "Pays: " + name\nou "Non défini"
+SingleCountry -> SingleCountry : extraction (years, medals)
 
 SingleCountry -> ChartSvc : getLineChart(years, medals)
 activate ChartSvc
-ChartSvc -> Chart : création line chart
+ChartSvc -> Factory : build(labels, data, 'lineChart', router)
+activate Factory
+Factory -> Chart : new Chart("countryChart", config)
 activate Chart
-Chart --> ChartSvc : Chart instance
+Chart --> Factory : Chart instance
 deactivate Chart
-ChartSvc --> SingleCountry : Chart configuré
+Factory --> ChartSvc : AppChart
+deactivate Factory
+ChartSvc --> SingleCountry : AppChart
 deactivate ChartSvc
 
-SingleCountry --> User : affichage line chart + KPIs
+SingleCountry -> Header : title, indicators
+activate Header
+Header --> User : affichage titre + indicateurs
+deactivate Header
+SingleCountry --> User : affichage line chart
 deactivate SingleCountry
+
+== Étape 4: Erreur de chargement ==
+note over OlympicGame, Service
+  Si l'appel HTTP échoue (OlympicGameComponent),
+  l'utilisateur est redirigé vers /not-found.
+end note
+OlympicGame -> Router : navigate(['/not-found'])
+Router -> Router : route '**' / 'not-found' → NotFoundComponent
 
 @enduml
