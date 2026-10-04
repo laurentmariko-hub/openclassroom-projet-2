@@ -13,10 +13,6 @@ export class ChartFactory {
 
   public static build(labels: string[], data: number[], chartType: chartType, router: Router): AppChart {
     if(chartType === 'lineChart') {
-    console.log(
-      'Canvas:',
-      document.getElementById('lineChart')
-    );
       return ChartFactory.buildChartLineChart(labels, data);
     } else if(chartType === 'pieChart') {
       return ChartFactory.buildPieChart(data, labels, router);

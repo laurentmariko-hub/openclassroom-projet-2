@@ -15,7 +15,6 @@ export class OlympicService {
   countryNames: string[] = [];
  
   constructor(private http: HttpClient) { 
-    console.log (`OlympicService constructeur appelé`);
   }
 
   public getParticipatingCountries(): Observable<Country[]> {
@@ -34,17 +33,14 @@ export class OlympicService {
   public getNumberOfCountries(countries: Country[]): number {
   
         const total = countries.length;
-        console.log(`Nombre total de JO : ${total}`);
         return total;
   }
 
   public getCountryNames(countries: Country[]): string[] | undefined {
-        console.log(`this.getCountries: Nombre de pays : ${countries.length}`);
         return countries.map((country: Country) => country.name);
   }
 
   public getCountryByName(name: string): Observable<Country | undefined> {
-    console.log(`Recherche du pays : ${name}`);
     return this.getParticipatingCountries().pipe(
       map((countries: Country[]) => {
         var countriesTemp : Country[];
@@ -57,7 +53,6 @@ export class OlympicService {
 
   public getTotalJOs(countries: Country[]): number {
         const total = countries.reduce((accumulator: number, country: Country) => accumulator + country.getTotalEntries(), 0);
-        console.log(`Nombre total de JO : ${total}`);
         return total;
   }
 

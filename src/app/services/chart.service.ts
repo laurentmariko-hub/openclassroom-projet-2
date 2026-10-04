@@ -13,9 +13,6 @@ export class ChartService {
   }
 
   public getPieChart(labels: string[], data: number[]): AppChart {
-    console.log("getPieChart data:");
-    console.log(labels);
-    console.log(data);
     return ChartFactory.build(labels, data, 'pieChart', this.router);
   }
 }
