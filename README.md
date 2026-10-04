@@ -22,7 +22,7 @@ Diagramme généré avec l’IA Claude Sonnet 5 à partir du code source:
 
 # Fonctionnalités
 
-Le site fait appel à une source de données bouchonnée sous la forme d’un ficher.
+Le site fait appel à une source de données bouchonnée sous la forme d’un fichier.
 
 Il affiche les données suivantes :
 
@@ -34,9 +34,9 @@ Les titres Number of countries et Number of JOs sont affichés en haut de la pag
 
 Chaque pays est représenté par sa couleur.
 
-Une légende des coude couleur par pays est affichée en dessous de ce header.
+Une légende des codes couleur par pays est affichée en dessous de ce header.
 
-Puis sous la légende, un diagramme de type Pie chart est affiché.
+Puis, sous la légende, un diagramme de type pie chart est affiché.
 
 Chaque partie du diagramme représente un pays.
 
@@ -44,8 +44,8 @@ Lorsqu’on clique sur une partie du diagramme, la page du pays correspondant s�
 
 ## Concernant la page pays :
 
-Le titre est affiché, ainsi que les titres number of entries, Total Number of medals et Total Number of athletes sont affiché, avec les chiffres correspondants.
+Le titre est affiché, ainsi que les titres number of entries, Total Number of medals et Total Number of athletes sont affichés avec les chiffres correspondants.
 
-En dessous, un diagramme est affiché, avec en abscisse les dates de participation, et en ordonnée, le nombre de médailles.
+En dessous, un diagramme est affiché, avec en abscisse les dates de participation et en ordonnée, le nombre de médailles.
 
 D’autre part, sous le diagramme, il y a un bouton Go back, qui renvoie vers la page d’accueil, c’est-à-dire la page précédente.
