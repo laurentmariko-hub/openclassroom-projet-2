@@ -6,7 +6,7 @@ Faire git clone https://github.com/laurentmariko-hub/openclassroom-projet-2.git
 
 Aller dans le répertoire openclassroom-projet-2
 
-Faire npm -version pour vérifier si l’utilitare npm est installé.
+Faire npm -version pour vérifier si l’utilitaire npm est installé.
 
 Sinon, l’installer.
 
