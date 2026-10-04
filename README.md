@@ -16,8 +16,8 @@ Faire ng serve.
 
 Puis ouvrir la page : http://localhost:4200/ dans un navigateur.
 
-# Structure (générée avec l’IA Claude Sonnet 5) :
-
+# Structure :
+Diagramme généré avec l’IA Claude Sonnet 5 à partir du code:
 ![](structure.png)
 
 # Fonctionnalités
